@@ -14,7 +14,7 @@ const {
   validateId,
   validateUpdateContact,
   validateFavoriteStatus,
-} = require("../validation");
+} = require("./validation");
 
 router.get("/", getContacts);
 
