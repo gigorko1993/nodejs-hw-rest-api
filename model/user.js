@@ -1,5 +1,5 @@
 const { Schema, model } = require("mongoose");
-// const { ValidContactName } = require("../config/constant");
+const { Subscription } = require("../config/constant");
 
 const userSchema = new Schema(
   {
@@ -11,11 +11,17 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Email is required"],
       unique: true,
+      validate(value) {
+        const re = /^\S+@\S+\.\S+$/;
+        return re.test(String(value).toLowerCase());
+      },
     },
     subscription: {
       type: String,
-      enum: ["starter", "pro", "business"],
-      default: "starter",
+      enum: {
+        values: [Subscription.START, Subscription.PRO, Subscription.BUSINESS],
+      },
+      default: Subscription.START,
     },
     token: {
       type: String,
