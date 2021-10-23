@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
+const quard = require("../../helpers/quard");
 
 const { registration, login, logout } = require("../../controllers/users");
 
-router.post("/registration", registration);
+router.post("/signup", registration);
 router.post("/login", login);
-router.post("/logout", logout);
+router.post("/logout", quard, logout);
 
 // const {
 //   validateContact,
