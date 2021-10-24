@@ -35,6 +35,7 @@ router.put(
 
 router.patch(
   "/:contactId/favorite/",
+  quard,
   [validateId, validateFavoriteStatus],
   updateFavoriteContact
 );

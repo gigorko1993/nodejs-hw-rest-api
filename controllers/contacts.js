@@ -4,8 +4,8 @@ const { HttpCode } = require("../config/constant");
 const getContacts = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const contacts = await Contacts.listContacts(userId);
-    res.json({ status: "success", code: HttpCode.OK, data: { contacts } });
+    const data = await Contacts.listContacts(userId, req.query);
+    res.json({ status: "success", code: HttpCode.OK, data: { ...data } });
   } catch (error) {
     next(error);
   }
