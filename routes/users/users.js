@@ -1,12 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const quard = require("../../helpers/quard");
+const loginLimit = require("../../helpers/rateLimitLogin");
 
-const { registration, login, logout } = require("../../controllers/users");
+const {
+  registration,
+  login,
+  logout,
+  currentUser,
+  updateSubscription,
+} = require("../../controllers/users");
 
 router.post("/signup", registration);
-router.post("/login", login);
+router.post("/login", loginLimit, login);
 router.post("/logout", quard, logout);
+router.get("/current", quard, currentUser);
+router.patch("/subscription", quard, updateSubscription);
 
 // const {
 //   validateContact,

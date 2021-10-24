@@ -63,8 +63,75 @@ const logout = async (req, res, next) => {
   return res.status(HttpCode.NO_CONTENT).json();
 };
 
+const currentUser = async (req, res, next) => {
+  try {
+    const { email, subscription, _id } = req.user;
+    return res.status(HttpCode.OK).json({
+      status: "success",
+      code: HttpCode.OK,
+      data: {
+        id: _id,
+        email: email,
+        subscription: subscription,
+      },
+    });
+  } catch (error) {
+    return res.status(HttpCode.UNAUTORIZED).json({
+      status: "error",
+      code: HttpCode.UNAUTORIZED,
+      message: "Not autorizated",
+    });
+  }
+};
+
+const updateSubscription = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const user = await Users.updateUserSubscription(userId, req.body);
+    if (user) {
+      return res.status(HttpCode.OK).json({
+        status: "success",
+        code: HttpCode.OK,
+        user: {
+          id: user.userId,
+          email: user.email,
+          subscription: user.subscription,
+        },
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// try {
+//   const userId = req.user._id;
+
+//   const contact = await Contacts.updateContact(
+//     req.params.contactId,
+//     req.body,
+//     userId
+//   );
+//   if (contact) {
+//     return res.status(HttpCode.OK).json({
+//       status: "success",
+//       code: HttpCode.OK,
+//       data: { contact },
+//     });
+//   }
+//   return res.status(HttpCode.FORBIDDEN).json({
+//     status: "error",
+//     code: HttpCode.FORBIDDEN,
+//     message: "Not Found",
+//   });
+// } catch (error) {
+//   next(error);
+// }
+
 module.exports = {
   registration,
   login,
   logout,
+  currentUser,
+  updateSubscription,
 };
