@@ -10,7 +10,6 @@ const {
 } = require("../../controllers/contacts");
 
 const quard = require("../../helpers/quard");
-const role = require("../../helpers/role");
 
 const {
   validateContact,
@@ -40,7 +39,5 @@ router.patch(
   [validateId, validateFavoriteStatus],
   updateFavoriteContact
 );
-
-router.get("/", quard, role(), (req, res, next) => {});
 
 module.exports = router;

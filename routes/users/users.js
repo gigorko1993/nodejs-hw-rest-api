@@ -11,23 +11,21 @@ const {
   updateSubscription,
 } = require("../../controllers/users");
 
-router.post("/signup", registration);
-router.post("/login", loginLimit, login);
+const {
+  validateUserRegistration,
+  validateUserLogin,
+  validateUserSubscription,
+} = require("./validation");
+
+router.post("/signup", validateUserRegistration, registration);
+router.post("/login", loginLimit, validateUserLogin, login);
 router.post("/logout", quard, logout);
 router.get("/current", quard, currentUser);
-router.patch("/subscription", quard, updateSubscription);
-
-// const {
-//   validateContact,
-//   validateId,
-//   validateUpdateContact,
-//   validateFavoriteStatus,
-// } = require("./validation");
-
-// router.patch(
-//   "/:contactId/favorite/",
-//   [validateId, validateFavoriteStatus],
-//   updateFavoriteContact
-// );
+router.patch(
+  "/subscription",
+  quard,
+  validateUserSubscription,
+  updateSubscription
+);
 
 module.exports = router;
