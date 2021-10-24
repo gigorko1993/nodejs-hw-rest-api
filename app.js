@@ -5,6 +5,7 @@ const helmet = require("helmet");
 
 const contactsRouter = require("./routes/contacts/contacts");
 const usersRouter = require("./routes/users/users");
+const { HttpCode } = require("./config/constant");
 
 const app = express();
 
@@ -19,11 +20,19 @@ app.use("/api/users", usersRouter);
 app.use("/api/contacts", contactsRouter);
 
 app.use((req, res) => {
-  res.status(404).json({ status: "error", code: 404, message: "Not found" });
+  res
+    .status(HttpCode.FORBIDDEN)
+    .json({ status: "error", code: HttpCode.FORBIDDEN, message: "Not found" });
 });
 
 app.use((err, req, res, next) => {
-  res.status(500).json({ status: "fail", code: 500, message: err.message });
+  res
+    .status(HttpCode.INTERNAL_SERVER_ERROR)
+    .json({
+      status: "fail",
+      code: HttpCode.INTERNAL_SERVER_ERROR,
+      message: err.message,
+    });
 });
 
 module.exports = app;
