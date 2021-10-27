@@ -1,6 +1,6 @@
 const multer = require("multer");
 require("dotenv").config();
-const { CustomErr, CustomError } = require("../helpers/customError");
+const { CustomError } = require("../helpers/customError");
 const { HttpCode } = require("../config/constant");
 const UPLOAD_DIR = process.env.UPLOAD_DIR;
 

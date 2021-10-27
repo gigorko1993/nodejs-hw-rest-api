@@ -105,6 +105,12 @@ const updateSubscription = async (req, res, next) => {
   }
 };
 
+const uploadAvatar = async (req, res, next) => {
+  const pic = req.file;
+  console.log(`pic`, pic);
+  return res.status(HttpCode.OK).json({ pic });
+};
+
 // try {
 //   const userId = req.user._id;
 
@@ -135,4 +141,5 @@ module.exports = {
   logout,
   currentUser,
   updateSubscription,
+  uploadAvatar,
 };
