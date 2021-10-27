@@ -10,6 +10,7 @@ const {
 } = require("../../controllers/contacts");
 
 const quard = require("../../helpers/quard");
+const customError = require("../../helpers/errorHandler");
 
 const {
   validateContact,
@@ -18,26 +19,26 @@ const {
   validateFavoriteStatus,
 } = require("./validation");
 
-router.get("/", quard, getContacts);
+router.get("/", quard, customError(getContacts));
 
-router.get("/:contactId", quard, validateId, getContact);
+router.get("/:contactId", quard, validateId, customError(getContact));
 
-router.post("/", quard, validateContact, createContact);
+router.post("/", quard, validateContact, customError(createContact));
 
-router.delete("/:contactId", quard, validateId, deleteContact);
+router.delete("/:contactId", quard, validateId, customError(deleteContact));
 
 router.put(
   "/:contactId",
   quard,
   [(validateId, validateUpdateContact)],
-  updateContact
+  customError(updateContact)
 );
 
 router.patch(
   "/:contactId/favorite/",
   quard,
   [validateId, validateFavoriteStatus],
-  updateFavoriteContact
+  customError(updateFavoriteContact)
 );
 
 module.exports = router;

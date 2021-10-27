@@ -21,6 +21,7 @@ router.post("/signup", validateUserRegistration, registration);
 router.post("/login", loginLimit, validateUserLogin, login);
 router.post("/logout", quard, logout);
 router.get("/current", quard, currentUser);
+router.patch("/avatars", quard, currentUser);
 router.patch(
   "/subscription",
   quard,
