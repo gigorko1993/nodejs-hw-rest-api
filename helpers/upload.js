@@ -1,6 +1,7 @@
 const multer = require("multer");
 require("dotenv").config();
-
+const { CustomErr, CustomError } = require("../helpers/customError");
+const { HttpCode } = require("../config/constant");
 const UPLOAD_DIR = process.env.UPLOAD_DIR;
 
 const storage = multer.diskStorage({
@@ -19,7 +20,7 @@ const upload = multer({
     if (file.mimetype.includes("image")) {
       return cb(null, true);
     }
-    cb(new Error("Accepted only images"));
+    cb(new CustomError(HttpCode.BAD_REQUEST, "Wrong avatar format"));
   },
 });
 
