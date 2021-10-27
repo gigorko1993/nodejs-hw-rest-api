@@ -1,5 +1,9 @@
 const jwt = require("jsonwebtoken");
+// const fs = require('fs/promises')
+const mkdirp = require("mkdirp");
+const path = require("path");
 const Users = require("../repository/users");
+const UploadService = require("../services/file-upload");
 const { HttpCode } = require("../config/constant");
 
 require("dotenv").config();
@@ -106,34 +110,22 @@ const updateSubscription = async (req, res, next) => {
 };
 
 const uploadAvatar = async (req, res, next) => {
-  const pic = req.file;
-  console.log(`pic`, pic);
-  return res.status(HttpCode.OK).json({ pic });
+  const userId = String(req.user._id);
+  const file = req.file;
+  const USERS_AVATAR = process.env.USERS_AVATAR;
+  const destination = path.join(USERS_AVATAR, userId);
+  await mkdirp(destination);
+  const uploadService = new UploadService(destination);
+  const avatarUrl = await uploadService.save(file, userId);
+  await Users.updateAvatar(userId, avatarUrl);
+  return res.status(HttpCode.OK).json({
+    status: "success",
+    code: HttpCode.OK,
+    date: {
+      avatar: avatarUrl,
+    },
+  });
 };
-
-// try {
-//   const userId = req.user._id;
-
-//   const contact = await Contacts.updateContact(
-//     req.params.contactId,
-//     req.body,
-//     userId
-//   );
-//   if (contact) {
-//     return res.status(HttpCode.OK).json({
-//       status: "success",
-//       code: HttpCode.OK,
-//       data: { contact },
-//     });
-//   }
-//   return res.status(HttpCode.FORBIDDEN).json({
-//     status: "error",
-//     code: HttpCode.FORBIDDEN,
-//     message: "Not Found",
-//   });
-// } catch (error) {
-//   next(error);
-// }
 
 module.exports = {
   registration,
