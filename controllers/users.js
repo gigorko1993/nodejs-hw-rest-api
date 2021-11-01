@@ -20,6 +20,7 @@ const registration = async (req, res, next) => {
     });
   }
   try {
+    // TODO send email verify
     const newUser = await Users.create({ email, password, subscription });
     return res.status(HttpCode.CREATED).json({
       status: "succes",
@@ -41,7 +42,7 @@ const login = async (req, res, next) => {
   const user = await Users.findByEmail(email);
   const isValidUserPassword = await user.isValidPassword(password);
 
-  if (!user || !isValidUserPassword) {
+  if (!user || !isValidUserPassword || !user?.verify) {
     return res.status(HttpCode.UNAUTORIZED).json({
       status: "error",
       code: HttpCode.UNAUTORIZED,
@@ -127,6 +128,18 @@ const uploadAvatar = async (req, res, next) => {
   });
 };
 
+const verifyUser = async (req, res, next) => {
+  const id = req.user._id;
+  await Users.updateToken(id, null);
+  return res.status(HttpCode.NO_CONTENT).json();
+};
+
+const repeatEmailVerify = async (req, res, next) => {
+  const id = req.user._id;
+  await Users.updateToken(id, null);
+  return res.status(HttpCode.NO_CONTENT).json();
+};
+
 module.exports = {
   registration,
   login,
@@ -134,4 +147,6 @@ module.exports = {
   currentUser,
   updateSubscription,
   uploadAvatar,
+  verifyUser,
+  repeatEmailVerify,
 };

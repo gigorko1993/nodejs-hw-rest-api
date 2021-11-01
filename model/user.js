@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const crypto = require("crypto");
 
 const gravatar = require("gravatar");
 
@@ -20,6 +21,15 @@ const userSchema = new Schema(
       validate(value) {
         const re = /^\S+@\S+\.\S+$/;
         return re.test(String(value).toLowerCase());
+      },
+      verify: {
+        type: Boolean,
+        default: false,
+      },
+      verifyToken: {
+        type: String,
+        required: [true, "Verify token is required"],
+        default: crypto.randomUUID(),
       },
     },
     subscription: {
