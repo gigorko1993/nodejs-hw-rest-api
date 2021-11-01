@@ -42,6 +42,21 @@ class EmailService {
 
     }
     async sendVerifyEmail(email, name, verifyToken) {
-        
+        const emailHTML = this.createTemplateEmail(name, verifyToken)
+        const msg = {
+            to: email,
+            subject: 'Verify your email',
+            html: emailHTML,
+        }
+        try {
+            const result = await this.sender.send(msg)
+            console.log(`result`, result)
+            return true
+        } catch (err) {
+            console.log(err.message)
+            return false
+        }
     }
 }
+
+module.exports = EmailService
