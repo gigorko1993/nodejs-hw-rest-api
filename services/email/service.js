@@ -13,28 +13,29 @@ class EmailService {
         break;
 
       default:
-        this.link = "https://6a59-77-123-189-179.ngrok.io";
+        this.link = "http://127.0.0.1:3000";
         break;
     }
   }
 
   createTemplateEmail(email, verifyToken) {
     const mailGenerator = new Mailgen({
-      theme: "salted",
+      theme: "cerberus",
       product: {
-        name: "GOIT",
+        name: "GOIT Contact Book",
         link: this.link,
       },
     });
     const customEmail = {
       body: {
         email,
-        intro: "Welcome to GOIT! We're very excited to have you on board.",
+        intro:
+          "Welcome to GOIT Contact book! We're very excited to have you on board.",
         action: {
           instructions:
-            "To get started with GOIT  CONTACT Book, please click here:",
+            "To get started work with GOIT Contact Book, please click here:",
           button: {
-            color: "#22BC66", // Optional action button color
+            color: "#63C5DA", // Optional action button color
             text: "Confirm your account",
             link: `${this.link}/api/users/verify/${verifyToken}`,
           },
