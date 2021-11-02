@@ -15,6 +15,8 @@ const {
   repeatEmailVerify,
 } = require("../../controllers/users");
 
+const customError = require("../../helpers/errorHandler");
+
 const {
   validateUserRegistration,
   validateUserLogin,
@@ -32,7 +34,7 @@ router.patch(
   validateUserSubscription,
   updateSubscription
 );
-router.get("/verify/:verificationToken", verifyUser);
+router.get("/verify/:verifyToken", customError(verifyUser));
 router.post("/verify", repeatEmailVerify);
 
 module.exports = router;

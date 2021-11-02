@@ -22,15 +22,15 @@ const userSchema = new Schema(
         const re = /^\S+@\S+\.\S+$/;
         return re.test(String(value).toLowerCase());
       },
-      verify: {
-        type: Boolean,
-        default: false,
-      },
-      verifyToken: {
-        type: String,
-        required: [true, "Verify token is required"],
-        default: crypto.randomUUID(),
-      },
+    },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verifyToken: {
+      type: String,
+      required: [true, "Verify token is required"],
+      default: crypto.randomUUID(),
     },
     subscription: {
       type: String,

@@ -1,10 +1,32 @@
-const sgMail = require('@sandgrid/mail')
-const nodemailer = require('nodemailer')
+const sgMail = require("@sendgrid/mail");
+const nodemailer = require("nodemailer");
+
+require("dotenv").config();
 
 class CreateSenderSandgrid {
-
+  async send(msg) {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    return await sgMail.send({ ...msg, from: "gigorko35@gmail.com" });
+  }
 }
 
-class CreateSenderNodemailer{ }
+class CreateSenderNodemailer {
+  async send(msg) {
+    const config = {
+      host: "smtp.meta.ua",
+      port: 465,
+      secure: true,
+      auth: {
+        user: "goitnodejs@meta.ua",
+        pass: process.env.PASSWORD,
+      },
+    };
+    const transporter = nodemailer.createTransport(config);
+    return await transporter
+      .sendMail({ ...msg, from: "goitnodejs@meta.ua" })
+      .then((info) => console.log(info))
+      .catch((err) => console.log(err));
+  }
+}
 
-module.exports = {CreateSenderNodemailer, CreateSenderSandgrid}
+module.exports = { CreateSenderNodemailer, CreateSenderSandgrid };

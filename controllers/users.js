@@ -1,10 +1,13 @@
 const jwt = require("jsonwebtoken");
 // const fs = require('fs/promises')
+const { CustomError } = require("../helpers/customError");
 const mkdirp = require("mkdirp");
 const path = require("path");
 const Users = require("../repository/users");
 const UploadService = require("../services/file-upload");
 const { HttpCode } = require("../config/constant");
+const EmailService = require("../services/email/service");
+const { CreateSenderSandgrid } = require("../services/email/sender");
 
 require("dotenv").config();
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
@@ -21,7 +24,16 @@ const registration = async (req, res, next) => {
   }
   try {
     // TODO send email verify
-    const newUser = await Users.create({ email, password, subscription });
+
+    const newUser = await Users.create({ password, email, subscription });
+    const emailService = new EmailService(
+      process.env.NODE_ENV,
+      new CreateSenderSandgrid()
+    );
+    const statusEmail = await emailService.sendVerifyEmail(
+      newUser.email,
+      newUser.verifyToken
+    );
     return res.status(HttpCode.CREATED).json({
       status: "succes",
       code: HttpCode.CREATED,
@@ -30,10 +42,11 @@ const registration = async (req, res, next) => {
         email: newUser.email,
         subscription: newUser.subscription,
         avatarURL: newUser.avatarURL,
+        succesEmail: statusEmail,
       },
     });
   } catch (err) {
-    console.log(err);
+    next(err);
   }
 };
 
@@ -51,7 +64,7 @@ const login = async (req, res, next) => {
   }
   const id = user._id;
   const payload = { id };
-  const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
+  const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "24h" });
   await Users.updateToken(id, token);
 
   return res.status(HttpCode.OK).json({
@@ -129,9 +142,18 @@ const uploadAvatar = async (req, res, next) => {
 };
 
 const verifyUser = async (req, res, next) => {
-  const id = req.user._id;
-  await Users.updateToken(id, null);
-  return res.status(HttpCode.NO_CONTENT).json();
+  const user = await Users.findUserByVerifyToken(req.params.verifyToken);
+  if (user) {
+    await Users.updateTokenVerify(user._id, true, null);
+    return res.status(HttpCode.OK).json({
+      status: "succes",
+      code: HttpCode.OK,
+      data: {
+        message: "Succes",
+      },
+    });
+  }
+  throw new CustomError(HttpCode.BAD_REQUEST, "Invalid token");
 };
 
 const repeatEmailVerify = async (req, res, next) => {
