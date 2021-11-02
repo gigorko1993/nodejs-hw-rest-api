@@ -7,7 +7,10 @@ const Users = require("../repository/users");
 const UploadService = require("../services/file-upload");
 const { HttpCode } = require("../config/constant");
 const EmailService = require("../services/email/service");
-const { CreateSenderSandgrid } = require("../services/email/sender");
+const {
+  CreateSenderSandgrid,
+  CreateSenderNodemailer,
+} = require("../services/email/sender");
 
 require("dotenv").config();
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
@@ -70,7 +73,7 @@ const login = async (req, res, next) => {
   return res.status(HttpCode.OK).json({
     status: "succes",
     code: HttpCode.OK,
-    date: {
+    data: {
       token,
     },
   });
@@ -135,7 +138,7 @@ const uploadAvatar = async (req, res, next) => {
   return res.status(HttpCode.OK).json({
     status: "success",
     code: HttpCode.OK,
-    date: {
+    data: {
       avatar: avatarUrl,
     },
   });
@@ -157,9 +160,24 @@ const verifyUser = async (req, res, next) => {
 };
 
 const repeatEmailVerify = async (req, res, next) => {
-  const id = req.user._id;
-  await Users.updateToken(id, null);
-  return res.status(HttpCode.NO_CONTENT).json();
+  const { email } = req.body;
+  const user = await Users.findByEmail(email);
+  if (user) {
+    const { email, verifyToken } = user;
+    const emailService = new EmailService(
+      process.env.NODE_ENV,
+      new CreateSenderNodemailer()
+    );
+    const statusEmail = await emailService.sendVerifyEmail(email, verifyToken);
+    console.log(statusEmail);
+  }
+  return res.status(HttpCode.OK).json({
+    status: "succes",
+    code: HttpCode.OK,
+    data: {
+      message: "Succes",
+    },
+  });
 };
 
 module.exports = {
