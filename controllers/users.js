@@ -1,10 +1,16 @@
 const jwt = require("jsonwebtoken");
 // const fs = require('fs/promises')
+const { CustomError } = require("../helpers/customError");
 const mkdirp = require("mkdirp");
 const path = require("path");
 const Users = require("../repository/users");
 const UploadService = require("../services/file-upload");
 const { HttpCode } = require("../config/constant");
+const EmailService = require("../services/email/service");
+const {
+  CreateSenderSandgrid,
+  CreateSenderNodemailer,
+} = require("../services/email/sender");
 
 require("dotenv").config();
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
@@ -20,7 +26,17 @@ const registration = async (req, res, next) => {
     });
   }
   try {
-    const newUser = await Users.create({ email, password, subscription });
+    // TODO send email verify
+
+    const newUser = await Users.create({ password, email, subscription });
+    const emailService = new EmailService(
+      process.env.NODE_ENV,
+      new CreateSenderSandgrid()
+    );
+    const statusEmail = await emailService.sendVerifyEmail(
+      newUser.email,
+      newUser.verifyToken
+    );
     return res.status(HttpCode.CREATED).json({
       status: "succes",
       code: HttpCode.CREATED,
@@ -29,10 +45,11 @@ const registration = async (req, res, next) => {
         email: newUser.email,
         subscription: newUser.subscription,
         avatarURL: newUser.avatarURL,
+        succesEmail: statusEmail,
       },
     });
   } catch (err) {
-    console.log(err);
+    next(err);
   }
 };
 
@@ -41,7 +58,7 @@ const login = async (req, res, next) => {
   const user = await Users.findByEmail(email);
   const isValidUserPassword = await user.isValidPassword(password);
 
-  if (!user || !isValidUserPassword) {
+  if (!user || !isValidUserPassword || !user?.verify) {
     return res.status(HttpCode.UNAUTORIZED).json({
       status: "error",
       code: HttpCode.UNAUTORIZED,
@@ -50,13 +67,13 @@ const login = async (req, res, next) => {
   }
   const id = user._id;
   const payload = { id };
-  const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
+  const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "24h" });
   await Users.updateToken(id, token);
 
   return res.status(HttpCode.OK).json({
     status: "succes",
     code: HttpCode.OK,
-    date: {
+    data: {
       token,
     },
   });
@@ -121,8 +138,44 @@ const uploadAvatar = async (req, res, next) => {
   return res.status(HttpCode.OK).json({
     status: "success",
     code: HttpCode.OK,
-    date: {
+    data: {
       avatar: avatarUrl,
+    },
+  });
+};
+
+const verifyUser = async (req, res, next) => {
+  const user = await Users.findUserByVerifyToken(req.params.verifyToken);
+  if (user) {
+    await Users.updateTokenVerify(user._id, true, null);
+    return res.status(HttpCode.OK).json({
+      status: "succes",
+      code: HttpCode.OK,
+      data: {
+        message: "Succes",
+      },
+    });
+  }
+  throw new CustomError(HttpCode.BAD_REQUEST, "Invalid token");
+};
+
+const repeatEmailVerify = async (req, res, next) => {
+  const { email } = req.body;
+  const user = await Users.findByEmail(email);
+  if (user) {
+    const { email, verifyToken } = user;
+    const emailService = new EmailService(
+      process.env.NODE_ENV,
+      new CreateSenderNodemailer()
+    );
+    const statusEmail = await emailService.sendVerifyEmail(email, verifyToken);
+    console.log(statusEmail);
+  }
+  return res.status(HttpCode.OK).json({
+    status: "succes",
+    code: HttpCode.OK,
+    data: {
+      message: "Succes",
     },
   });
 };
@@ -134,4 +187,6 @@ module.exports = {
   currentUser,
   updateSubscription,
   uploadAvatar,
+  verifyUser,
+  repeatEmailVerify,
 };
