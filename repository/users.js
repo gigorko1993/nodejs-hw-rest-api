@@ -17,8 +17,8 @@ const updateUserSubscription = async (id, body) => {
   return await User.findOneAndUpdate({ _id: id }, { ...body }, { new: true });
 };
 
-const updateAvatar = async (id, avatar) => {
-  return await User.updateOne({ _id: id }, { avatar });
+const updateAvatar = async (id, avatar, idUserCloud = null) => {
+  return await User.updateOne({ _id: id }, { avatar, idUserCloud });
 };
 
 const updateToken = async (id, token) => {
