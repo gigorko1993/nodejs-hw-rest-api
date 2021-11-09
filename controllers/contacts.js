@@ -58,11 +58,7 @@ const updateContact = async (req, res, next) => {
       data: { contact },
     });
   }
-  return res.status(HttpCode.FORBIDDEN).json({
-    status: "error",
-    code: HttpCode.FORBIDDEN,
-    message: "Not Found",
-  });
+  throw new CustomError(HttpCode.FORBIDDEN, "Not Found");
 };
 
 const updateFavoriteContact = async (req, res, next) => {
