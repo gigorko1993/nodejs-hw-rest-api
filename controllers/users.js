@@ -56,7 +56,7 @@ const registration = async (req, res, next) => {
 const login = async (req, res, next) => {
   const { email, password } = req.body;
   const user = await Users.findByEmail(email);
-  const isValidUserPassword = await user.isValidPassword(password);
+  const isValidUserPassword = await user?.isValidPassword(password);
 
   if (!user || !isValidUserPassword || !user?.verify) {
     return res.status(HttpCode.UNAUTORIZED).json({
